@@ -11,33 +11,52 @@ return {
       end
   
       local cmp = require("cmp")
+      local luasnip = require("luasnip")
   
       opts.mapping = vim.tbl_extend("force", opts.mapping, {
-        ["<Tab>"] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            -- You could replace select_next_item() with confirm({ select = true }) to get VS Code autocompletion behavior
-            cmp.select_next_item()
-          elseif vim.snippet.active({ direction = 1 }) then
-            vim.schedule(function()
-              vim.snippet.jump(1)
-            end)
-          elseif has_words_before() then
-            cmp.complete()
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
-        ["<S-Tab>"] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            cmp.select_prev_item()
-          elseif vim.snippet.active({ direction = -1 }) then
-            vim.schedule(function()
-              vim.snippet.jump(-1)
-            end)
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
+        -- ["<Tab>"] = cmp.mapping(function(fallback)
+        --   if cmp.visible() then
+        --     -- You could replace select_next_item() with confirm({ select = true }) to get VS Code autocompletion behavior
+        --     cmp.select_next_item()
+        --   elseif vim.snippet.active({ direction = 1 }) then
+        --     vim.schedule(function()
+        --       vim.snippet.jump(1)
+        --     end)
+        --   elseif has_words_before() then
+        --     cmp.complete()
+        --   else
+        --     fallback()
+        --   end
+        -- end, { "i", "s" }),
+        -- ["<S-Tab>"] = cmp.mapping(function(fallback)
+        --   if cmp.visible() then
+        --     cmp.select_prev_item()
+        --   elseif vim.snippet.active({ direction = -1 }) then
+        --     vim.schedule(function()
+        --       vim.snippet.jump(-1)
+        --     end)
+        --   else
+        --     fallback()
+        --   end
+        -- end, { "i", "s" }),
+        ['<Tab>'] = function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-expand-or-jump', true, true, false), '')
+            else
+              fallback()
+            end
+          end,
+          ['<S-Tab>'] = function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then
+              vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-jump-prev', true, true, false), '')
+            else
+              fallback()
+            end
+          end,
       })
     end,
   }
